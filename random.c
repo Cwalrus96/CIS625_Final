@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <time.h>
 
+/** @param upperBound Upper bound is excluded, so it can be used as random index generator
+*/
 double random0to(double upperBound)
 {
     return (double)rand() / ((double)RAND_MAX + 1) * upperBound;
