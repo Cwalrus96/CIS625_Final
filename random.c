@@ -10,15 +10,25 @@ double randomInDeltaNeighbourhood(double number, double delta)
 	double rangeWidth, rangeOffset, rangeLowBound;
 	rangeWidth = delta * 2 * number;
 	rangeLowBound = number - (delta * number);
-	rangeOffset = rand() / (RAND_MAX / rangeWidth + 1);
+	rangeOffset = (double)rand() / (double)((unsigned)RAND_MAX / rangeWidth + 1);
 	return rangeLowBound + rangeOffset;
+}
+
+double random0to1()
+{
+    return (double)rand() / (double)((unsigned)RAND_MAX + 1);
 }
 
 int main()
 {
-	int i;
+	int i, sum;
+	sum = 0;
 	srand(time(NULL));
 	for(i=0; i<20; i++)
 		printf("%f\n", randomInDeltaNeighbourhood(10.0, 0.1));
+	for(i=0; i<10000000; i++)
+		if(random0to1() < 0.1)
+			sum++;
+	printf("Probabilty: %f, should be 0.1\n", sum/10000000.0);
 	return 1;
 }
