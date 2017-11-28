@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <time.h>
 
+/** @param number Number in which surrounding we generate the random number.
+	@param delta Delta surrounding in percent. E.g. 0.1 = number +/- 10%
+*/
 double randomInDeltaNeighbourhood(double number, double delta)
 {
 	double rangeWidth, rangeOffset, rangeLowBound;
