@@ -1,0 +1,2 @@
+#define PARAMETERS_COUNT 14
+#define POPULATION_SIZE  32
