@@ -1,13 +1,27 @@
-#include "constants.h"
+#ifndef INDIVIDUAL
+#define INDIVIDUAL
 
-typedef struct Individual
-{
-	double fitness;
-	double params[PARAMETERS_COUNT];
+#include <vector>
+
+class CIndividual{
+
+  private:
+
+	const static int parameters_count;
+	static double randomInDeltaNeighborhood(double, double);
+	void calculateFitness(const CIndividual & model);
+
+	double m_fitness;
+	std::vector<double> m_params;
+
+  public:
+
+  CIndividual (const std::vector<double> &);
+
+	CIndividual (const CIndividual &, double);
+
+	void debugPrint();
+
 };
 
-void Individual_CalculateFitness(Individual * self, Individual * example);
-
-void Individual_RandomCtor(Individual * self, Individual * example, double delta);
-
-void Individual_Copy(Individual * source, Individual * destination);
+#endif
