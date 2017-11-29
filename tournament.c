@@ -9,7 +9,7 @@ double random0to(double upperBound)
     return (double)rand() / ((double)RAND_MAX + 1) * upperBound;
 }
 
-int binaryTournament(Individual * populationArray, int arraySize, double probability)
+int GA_binaryTournament(Individual * populationArray, int arraySize, double probability)
 {
 	int randomIndex, randomIndex2, tmp;
 	randomIndex = (int)random0to(arraySize);
@@ -38,8 +38,8 @@ int main()
 	int i, index;
 	for(i = 0; i < (POPULATION_SIZE / 2); i++)
 	{
-		index = binaryTournament(populationArray, POPULATION_SIZE, 0.8);
-		
+		index = GA_binaryTournament(populationArray, POPULATION_SIZE, 0.8);
+
 	}
 	return 1;
 }
