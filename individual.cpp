@@ -97,7 +97,7 @@ std::pair<CIndividual,CIndividual> CIndividual::crossover(const CIndividual & pa
 		child2.m_params[i] = parent1.m_params[i];
 	}   
 	*/
-  return std::make_pair(child1,child2);
+	return std::make_pair(child1,child2);
 }
 
 void CIndividual::mutation()

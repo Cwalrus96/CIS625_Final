@@ -36,17 +36,16 @@ void CGA::crossoverAndMutation(const CIndividual * inArray)
 
    for(int i=0; i<getPopulationSize(); i+=2) {
       // Crossover
-      if(Utility::random0to(1)<0) {
+      if(Utility::random0to(1)<0.9) {
          std::pair<CIndividual,CIndividual> children = CIndividual::crossover(inArray[i],inArray[i+1]);
-
-
-         /*inArray[i].debugPrint();
+/*
+         inArray[i].debugPrint();
          inArray[i+1].debugPrint();
          children.first.debugPrint();
          children.second.debugPrint();
 
-         std::cout<<std::endl;*/
-
+         std::cout<<std::endl;
+*/
          m_population[i] = children.first;
          m_population[i+1] = children.second;
       }
@@ -77,7 +76,7 @@ CIndividual CGA::run()
 
    evaluateFitness();
 
-   for(int i=0;i<10000;++i){
+   for(int i=0;i<1000;++i){
       CIndividual newPopulation[population_size];
       tournamentSelection(newPopulation);
       crossoverAndMutation(newPopulation);
