@@ -20,10 +20,15 @@ double CIndividual::randomInDeltaNeighborhood(double number, double delta)
 void CIndividual::calculateFitness()
 {
   double default_parameters[] = {30611,113.064,0.5289,0.5916,0.0426,1.3484,80.5297,2.85,2.25,2.9699,1017.1};
-	double fitness = 0.0;
+	double tmp, fitness;
+	fitness = 0.0;
 	for(int i=0; i<PARAMETERS_COUNT; ++i){
 		// Squared error - just dummy calculation
-		fitness += ((default_parameters[i] - m_params[i]) * (default_parameters[i] - m_params[i]));
+		tmp = (default_parameters[i] - m_params[i]);
+		if(tmp<0.0)
+			tmp = -tmp;
+		fitness += tmp/m_params[i];
+		//fitness += ((default_parameters[i] - m_params[i]) * (default_parameters[i] - m_params[i]));
 	}
 	m_fitness = fitness*(-1);
 }

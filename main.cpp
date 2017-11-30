@@ -15,7 +15,9 @@ int main()
 
    double default_parameters[] = {30611,113.064,0.5289,0.5916,0.0426,1.3484,80.5297,2.85,2.25,2.9699,1017.1};
    
-   CGA cga(default_parameters, 0.1);
+   CGA cga1(default_parameters, 0.1);
+   CGA cga2(default_parameters, 0.1);
+   CGA cga3(default_parameters, 0.1);
    
    /*std::cout<<"defaultni parametry:"<<std::endl;
    CIndividual a(default_parameters, 0);
@@ -23,10 +25,19 @@ int main()
    std::cout<<std::endl;
 */
    // cga.run(pocet iteraci, velikost turnaje, pravdepodobnost Xoveru, pravdepodobnost mutace)
-   CIndividual nejlepsi_typek(cga.run(40, 10, 0.9, 0.1));
 
-   std::cout<<"nejlepsi typek:"<<std::endl;
-   std::cout<<nejlepsi_typek.getFitness()<<std::endl;
+   int pocetIteraci;
+   pocetIteraci = 100;
+   CIndividual nejlepsi_typek1(cga1.run(pocetIteraci, 10, 0.9, 0.1));
+   std::cout<<"Fitness po " << pocetIteraci << " iteracich: " << nejlepsi_typek1.getFitness()<<std::endl;
+
+   pocetIteraci = 1000;
+   CIndividual nejlepsi_typek2(cga2.run(pocetIteraci, 10, 0.9, 0.1));
+   std::cout<<"Fitness po " << pocetIteraci << " iteracich: " << nejlepsi_typek2.getFitness()<<std::endl;
+
+   pocetIteraci = 10000;
+   CIndividual nejlepsi_typek3(cga3.run(pocetIteraci, 10, 0.9, 0.1));
+   std::cout<<"Fitness po " << pocetIteraci << " iteracich: " << nejlepsi_typek3.getFitness()<<std::endl;
    //std::cout<<"nejlepsi typek:"<<std::endl;
    //nejlepsi_typek.debugPrint();
    //std::cout<<std::endl;
