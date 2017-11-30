@@ -2,12 +2,15 @@
 
 class CGA
 {
+   private:
+      int m_iterationsCount, m_tournamentSize;
+      double m_crossoverProbability, m_mutationProbability;
    public:
    
       const static int population_size = 100;
 
       CGA(const double *, const double);
-      CIndividual run();
+      CIndividual run(int, int, double, double);
       void evaluateFitness();
       int getPopulationSize();
 

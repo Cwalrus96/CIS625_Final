@@ -20,7 +20,7 @@ void CGA::tournamentSelection(CIndividual * newPopulation)
    {
 
       int fittest = Utility::randomIndex(population_size);
-      for ( int j = 0; j < TOURNAMENT_SIZE-1; j++ )
+      for ( int j = 1; j < m_tournamentSize; j++ )
       {
          int ind = Utility::randomIndex(population_size);
          if ( m_population[ind].getFitness() > m_population[fittest].getFitness());
@@ -36,7 +36,7 @@ void CGA::crossoverAndMutation(const CIndividual * inArray)
 
    for(int i=0; i<getPopulationSize(); i+=2) {
       // Crossover
-      if(Utility::random0to(1)<0.9) {
+      if(Utility::random0to(1)<m_crossoverProbability) {
          std::pair<CIndividual,CIndividual> children = CIndividual::crossover(inArray[i],inArray[i+1]);
 /*
          inArray[i].debugPrint();
@@ -51,19 +51,22 @@ void CGA::crossoverAndMutation(const CIndividual * inArray)
       }
 
 
-      if(Utility::random0to(1)<0.1)
+      if(Utility::random0to(1)<m_mutationProbability)
       {
          m_population[i].mutation();
       }
-      if(Utility::random0to(1)<0.1)
+      if(Utility::random0to(1)<m_mutationProbability)
       {
          m_population[i+1].mutation();
       }
    }
 }
 
-CIndividual CGA::run()
+CIndividual CGA::run(int iter, int torunament, double cross, double mutate)
 {
+   m_tournamentSize = torunament;
+   m_crossoverProbability = cross;
+   m_mutationProbability  = mutate;
 
 
    // CIndividual modelIndividual({30611,113.064,0.5289,0.5916,0.0426,1.3484,80.5297,2.85,2.25,2.9699,1017.1});
@@ -76,7 +79,7 @@ CIndividual CGA::run()
 
    evaluateFitness();
 
-   for(int i=0;i<1000;++i){
+   for(int i=0;i<iter;++i){
       CIndividual newPopulation[population_size];
       tournamentSelection(newPopulation);
       crossoverAndMutation(newPopulation);

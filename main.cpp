@@ -22,7 +22,8 @@ int main()
    a.debugPrint();
    std::cout<<std::endl;
 */
-   CIndividual nejlepsi_typek (cga.run());
+   // cga.run(pocet iteraci, velikost turnaje, pravdepodobnost Xoveru, pravdepodobnost mutace)
+   CIndividual nejlepsi_typek(cga.run(1000, 10, 0.9, 0.1));
 
    std::cout<<"nejlepsi typek:"<<std::endl;
    std::cout<<nejlepsi_typek.getFitness()<<std::endl;
