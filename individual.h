@@ -3,23 +3,31 @@
 
 #include "constants.h"
 
-class CIndividual{
+class CIndividual
+{
 
   private:
 	static double randomInDeltaNeighborhood(double, double);
 	void calculateFitness(const CIndividual & model);
 
 	double m_params[PARAMETERS_COUNT];
-
-  public:
 	double m_fitness;
 
-	CIndividual(){};
-	CIndividual (const double *);
+  public:
+
+	CIndividual() {};
 	CIndividual (const double *, double);
-	CIndividual (const CIndividual &, double);
-        CIndividual & operator= (const CIndividual &);
-        CIndividual(const CIndividual &);
+	CIndividual (const CIndividual &);
+    
+    CIndividual & operator= (const CIndividual &);
+    CIndividual(const CIndividual &, bool);
+
+	void crossover(const CIndividual &);
+
+	void mutation(const CIndividual &, int);
+
+    int getParamsCount();
+    int getFitness();
 
 	void debugPrint();
 

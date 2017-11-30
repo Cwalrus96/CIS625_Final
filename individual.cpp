@@ -26,27 +26,22 @@ void CIndividual::calculateFitness(const CIndividual & model)
 	m_fitness = fitness;
 }
 
-CIndividual::CIndividual(const double * params)
+// Making a model
+CIndividual::CIndividual(const double * params, double delta)
 {
-  memcpy(m_params, params, PARAMETERS_COUNT);
+	m_fitness = delta;
+	memcpy(m_params, params, PARAMETERS_COUNT);
 }
 
-CIndividual::CIndividual (const double * params, double delta)
+// Making random individual based on model
+CIndividual::CIndividual (const CIndividual & model, bool generateRandom)
 {
-	do{
-		for(int i=0; i<PARAMETERS_COUNT; ++i){
-			m_params[i] = (randomInDeltaNeighborhood(params[i],delta));
-		}
-	}while(m_params[8] < m_params[7]);
-}
-
-CIndividual::CIndividual (const CIndividual & model, double delta)
-{
+	int delta = model.m_fitness;
 	do{
 		for(int i=0; i<PARAMETERS_COUNT; ++i){
 			m_params[i] = (randomInDeltaNeighborhood(model.m_params[i],delta));
 		}
-	}while(m_params[8] < m_params[7]);
+	}while(m_params[8] > m_params[7]);
 }
 
 CIndividual & CIndividual::operator= (const CIndividual & o)
@@ -67,4 +62,30 @@ void CIndividual::debugPrint(){
 		std::cout<<", "<<m_params[i];
 	}
 	std::cout<<std::endl;
+}
+
+int CIndividual::getParamsCount()
+{
+	return PARAMETERS_COUNT;
+}
+
+int CIndividual::getFitness()
+{
+	return m_fitness;
+}
+
+void CIndividual::crossover(const CIndividual & other)
+{
+   for(int i=1; i<getParamsCount(); i+=2)
+   {
+      m_params[i] = other.m_params[i];
+   }
+}
+
+void CIndividual::mutation(const CIndividual & model, int changeIndex)
+{
+   do {
+      CIndividual tmp(model, true);
+      m_params[changeIndex] = tmp.m_params[changeIndex];
+   } while(m_params[8] > m_params[7]);
 }

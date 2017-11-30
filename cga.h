@@ -4,9 +4,12 @@ class CGA
 {
    private:
       CIndividual m_population[POPULATION_SIZE];
-      void tournamentSelection(CIndividual * newPopulation);
+      CIndividual m_model;
+      void tournamentSelection(CIndividual *);
+      // Tmp array, Model individual
+      void crossoverAndMutation(const CIndividual *);
    public:
-      CGA(const double *);
+      CGA(const double *, const double);
       const double run();
-
+      int getPopulationSize();
 };
