@@ -8,8 +8,8 @@ class CIndividual
 {
 
   private:
-  const static double s_mutationParameterDelta = 0.1;
-  const static double s_mutationProbability = 0.1;
+  static constexpr double s_mutationParameterDelta = 0.1;
+  static constexpr double s_mutationProbability = 0.1;
 
 	static double randomInDeltaNeighborhood(double, double);
 
@@ -21,10 +21,10 @@ class CIndividual
   // Ctors
 	CIndividual() {};
 	CIndividual (const double *, double);
-	//CIndividual (const CIndividual &);
+	CIndividual (const CIndividual &);
     
 	// Copying
-  //CIndividual & operator= (const CIndividual &);
+  CIndividual & operator= (const CIndividual &);
 
   // Genetic
   void calculateFitness();

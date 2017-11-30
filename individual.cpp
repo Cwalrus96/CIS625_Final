@@ -37,7 +37,7 @@ CIndividual::CIndividual(const double * params, double delta)
 	}while(checkNotPass());
 }
 
-/*CIndividual & CIndividual::operator= (const CIndividual & o)
+CIndividual & CIndividual::operator= (const CIndividual & o)
 {
    memcpy(this, &o, sizeof(CIndividual));
    return *this;
@@ -47,7 +47,7 @@ CIndividual::CIndividual(const CIndividual & o)
 {
    memcpy(this, &o, sizeof(CIndividual));
 }
-*/
+
 void CIndividual::debugPrint() const{
 	std::cout<<m_params[0];
 	for(int i=1; i<PARAMETERS_COUNT; ++i){
@@ -70,6 +70,23 @@ std::pair<CIndividual,CIndividual> CIndividual::crossover(const CIndividual & pa
 	int mid = Utility::randomIndex(4)+4;
 	CIndividual child1,child2;
 
+	const int uniformCross[] = {1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0};
+
+	for(int i=0; i<parent1.getParamsCount(); i++)
+	{
+		if(uniformCross[i])
+		{
+			child1.m_params[i] = parent2.m_params[i];
+			child2.m_params[i] = parent1.m_params[i];
+		}
+		else
+		{
+			child1.m_params[i] = parent1.m_params[i];
+			child2.m_params[i] = parent2.m_params[i];
+		}
+	}
+	/*
+
 	for(int i=0; i<mid; i+=1){
 		child1.m_params[i] = parent1.m_params[i];
 		child2.m_params[i] = parent2.m_params[i];
@@ -79,7 +96,7 @@ std::pair<CIndividual,CIndividual> CIndividual::crossover(const CIndividual & pa
 		child1.m_params[i] = parent2.m_params[i];
 		child2.m_params[i] = parent1.m_params[i];
 	}   
-
+	*/
   return std::make_pair(child1,child2);
 }
 
