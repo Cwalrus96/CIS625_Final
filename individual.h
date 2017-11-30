@@ -8,9 +8,6 @@ class CIndividual
 {
 
   private:
-  static constexpr double s_mutationParameterDelta = 0.1;
-  static constexpr double s_mutationProbability = 0.1;
-
 	static double randomInDeltaNeighborhood(double, double);
 
 	double m_params[PARAMETERS_COUNT];
@@ -21,15 +18,15 @@ class CIndividual
   // Ctors
 	CIndividual() {};
 	CIndividual (const double *, double);
-	CIndividual (const CIndividual &);
+	//CIndividual (const CIndividual &);
     
 	// Copying
-  CIndividual & operator= (const CIndividual &);
+  //CIndividual & operator= (const CIndividual &);
 
   // Genetic
   void calculateFitness();
 	static std::pair<CIndividual,CIndividual> crossover(const CIndividual &,const CIndividual &);
-	void mutation();
+	void mutation(const double, const double);
 
   int getParamsCount() const;
   double getFitness() const;

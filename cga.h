@@ -7,10 +7,10 @@ class CGA
       double m_crossoverProbability, m_mutationProbability;
    public:
    
-      const static int population_size = 100;
+      const static int population_size = 10000;
 
-      CGA(const double *, const double);
-      CIndividual run(int, int, double, double);
+      CGA(const double *, const double, const double, const double);
+      CIndividual run(int, int);
       void evaluateFitness();
       int getPopulationSize();
 

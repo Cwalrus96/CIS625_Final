@@ -1,2 +1,1 @@
-#define TOURNAMENT_SIZE  10
 #define PARAMETERS_COUNT 11
