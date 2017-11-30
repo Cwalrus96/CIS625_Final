@@ -7,6 +7,9 @@ class CIndividual
 {
 
   private:
+  const static double s_mutationParameterProbability = 0.1;
+  const static double s_mutationProbability = 0.1;
+
 	static double randomInDeltaNeighborhood(double, double);
 
 	double m_params[PARAMETERS_COUNT];
@@ -14,22 +17,21 @@ class CIndividual
 	bool checkNotPass();
 
   public:
-  	// Ctors
+  // Ctors
 	CIndividual() {};
 	CIndividual (const double *, double);
-	CIndividual (const CIndividual &);
+	//CIndividual (const CIndividual &);
     
-    // Copying
-    CIndividual & operator= (const CIndividual &);
-    CIndividual(const CIndividual &, bool);
+	// Copying
+  //CIndividual & operator= (const CIndividual &);
 
-    // Genetic
-    void calculateFitness(const CIndividual & model);
+  // Genetic
+  void calculateFitness();
 	void crossover(const CIndividual &);
-	void mutation(const CIndividual &);
+	void mutation();
 
-    int getParamsCount() const;
-    double getFitness() const;
+  int getParamsCount() const;
+  double getFitness() const;
 
 	void debugPrint();
 };

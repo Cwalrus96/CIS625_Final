@@ -3,11 +3,11 @@
 #include "utility.h"
 #include "cga.h"
 
-CGA::CGA(const double * array, const double delta) : m_model(array, delta)
+CGA::CGA(const double * array, const double delta)
 {
    for ( int i = 0; i < POPULATION_SIZE; i++ )
    {
-      m_population[i] = CIndividual(m_model, true);
+      m_population[i] = CIndividual(array, delta);
    }
 }
 
@@ -50,13 +50,13 @@ void CGA::crossoverAndMutation(const CIndividual * inArray)
       {
          //tmpIndex = Utility::randomIndex(PARAMETERS_COUNT);
          //m_population[i].mutation(m_model, tmpIndex);
-         m_population[i].mutation(m_model);
+         m_population[i].mutation();
       }
       if(Utility::random0to(1)<0.1)
       {
          //tmpIndex = Utility::randomIndex(PARAMETERS_COUNT);
          //m_population[i].mutation(m_model, tmpIndex);
-         m_population[i].mutation(m_model);
+         m_population[i].mutation();
       }
    }
 }
@@ -90,6 +90,6 @@ void CGA::evaluateFitness()
 {
    for(int i=0; i<getPopulationSize(); i++)
    {
-      m_population[i].calculateFitness(m_model);
+      m_population[i].calculateFitness();
    }
 }
