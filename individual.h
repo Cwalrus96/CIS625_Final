@@ -1,24 +1,25 @@
 #ifndef INDIVIDUAL
 #define INDIVIDUAL
 
-#include <vector>
+#include "constants.h"
 
 class CIndividual{
 
   private:
-
-	const static int parameters_count;
 	static double randomInDeltaNeighborhood(double, double);
 	void calculateFitness(const CIndividual & model);
 
-	double m_fitness;
-	std::vector<double> m_params;
+	double m_params[PARAMETERS_COUNT];
 
   public:
+	double m_fitness;
 
-  CIndividual (const std::vector<double> &);
-
+	CIndividual(){};
+	CIndividual (const double *);
+	CIndividual (const double *, double);
 	CIndividual (const CIndividual &, double);
+        CIndividual & operator= (const CIndividual &);
+        CIndividual(const CIndividual &);
 
 	void debugPrint();
 
