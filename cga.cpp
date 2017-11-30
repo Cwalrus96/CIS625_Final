@@ -72,6 +72,8 @@ const double CGA::run()
 //   evaluateFitness();
 
    CIndividual newPopulation[POPULATION_SIZE];
+
+   evaluateFitness();
    tournamentSelection(newPopulation);
 
    return 0.0;
@@ -80,4 +82,12 @@ const double CGA::run()
 int CGA::getPopulationSize()
 {
    return POPULATION_SIZE;
+}
+
+void CGA::evaluateFitness()
+{
+   for(int i=0; i<getPopulationSize(); i++)
+   {
+      m_population[i].calculateFitness(m_model);
+   }
 }
