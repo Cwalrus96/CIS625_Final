@@ -30,18 +30,18 @@ void CIndividual::calculateFitness(const CIndividual & model)
 CIndividual::CIndividual(const double * params, double delta)
 {
 	m_fitness = delta;
-	memcpy(m_params, params, PARAMETERS_COUNT);
+	memcpy(m_params, params, sizeof(double) * PARAMETERS_COUNT);
 }
 
 // Making random individual based on model
 CIndividual::CIndividual (const CIndividual & model, bool generateRandom)
 {
-	int delta = model.m_fitness;
+	double delta = model.getFitness();
 	do{
 		for(int i=0; i<PARAMETERS_COUNT; ++i){
 			m_params[i] = (randomInDeltaNeighborhood(model.m_params[i],delta));
 		}
-	}while(m_params[8] > m_params[7]);
+	}while(checkNotPass());
 }
 
 CIndividual & CIndividual::operator= (const CIndividual & o)
@@ -64,12 +64,12 @@ void CIndividual::debugPrint(){
 	std::cout<<std::endl;
 }
 
-int CIndividual::getParamsCount()
+int CIndividual::getParamsCount() const
 {
 	return PARAMETERS_COUNT;
 }
 
-int CIndividual::getFitness()
+double CIndividual::getFitness() const
 {
 	return m_fitness;
 }
@@ -82,10 +82,30 @@ void CIndividual::crossover(const CIndividual & other)
    }
 }
 
-void CIndividual::mutation(const CIndividual & model, int changeIndex)
+/*void CIndividual::mutation(const CIndividual & model, int changeIndex)
 {
    do {
       CIndividual tmp(model, true);
       m_params[changeIndex] = tmp.m_params[changeIndex];
    } while(m_params[8] > m_params[7]);
+}*/
+
+void CIndividual::mutation(const CIndividual & model)
+{
+	double delta = model.getFitness();
+	for(int i=0;i<getParamsCount();i++)
+	{
+		if(Utility::random0to(1) < 0.1)
+		{
+			do {
+				m_params[i] = randomInDeltaNeighborhood(m_params[i], delta);
+   			} while(checkNotPass());
+   			//std::cout << "I'm mutating" << std::endl;
+		}
+	}
+}
+
+bool CIndividual::checkNotPass()
+{
+	return m_params[8] > m_params[7];
 }

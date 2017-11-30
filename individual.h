@@ -11,6 +11,7 @@ class CIndividual
 
 	double m_params[PARAMETERS_COUNT];
 	double m_fitness;
+	bool checkNotPass();
 
   public:
   	// Ctors
@@ -25,10 +26,10 @@ class CIndividual
     // Genetic
     void calculateFitness(const CIndividual & model);
 	void crossover(const CIndividual &);
-	void mutation(const CIndividual &, int);
+	void mutation(const CIndividual &);
 
-    int getParamsCount();
-    int getFitness();
+    int getParamsCount() const;
+    double getFitness() const;
 
 	void debugPrint();
 };

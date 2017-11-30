@@ -48,13 +48,15 @@ void CGA::crossoverAndMutation(const CIndividual * inArray)
       // Mutation
       if(Utility::random0to(1)<0.1)
       {
-         tmpIndex = Utility::randomIndex(PARAMETERS_COUNT);
-         m_population[i].mutation(m_model, tmpIndex);
+         //tmpIndex = Utility::randomIndex(PARAMETERS_COUNT);
+         //m_population[i].mutation(m_model, tmpIndex);
+         m_population[i].mutation(m_model);
       }
       if(Utility::random0to(1)<0.1)
       {
-         tmpIndex = Utility::randomIndex(PARAMETERS_COUNT);
-         m_population[i].mutation(m_model, tmpIndex);
+         //tmpIndex = Utility::randomIndex(PARAMETERS_COUNT);
+         //m_population[i].mutation(m_model, tmpIndex);
+         m_population[i].mutation(m_model);
       }
    }
 }
