@@ -2,10 +2,13 @@
 #include "constants.h"
 #include "utility.h"
 #include "cga.h"
+#include <iostream>
 
 CGA::CGA(const double * array, const double delta)
 {
-   for ( int i = 0; i < POPULATION_SIZE; i++ )
+
+
+   for ( int i = 0; i < population_size; i++ )
    {
       m_population[i] = CIndividual(array, delta);
    }
@@ -13,13 +16,13 @@ CGA::CGA(const double * array, const double delta)
 
 void CGA::tournamentSelection(CIndividual * newPopulation)
 {
-   for ( int i = 0; i < POPULATION_SIZE; i++ )
+   for ( int i = 0; i < population_size; i++ )
    {
 
-      int fittest = Utility::randomIndex(100);
+      int fittest = Utility::randomIndex(population_size);
       for ( int j = 0; j < TOURNAMENT_SIZE-1; j++ )
       {
-         int ind = Utility::randomIndex(100);
+         int ind = Utility::randomIndex(population_size);
          if ( m_population[ind].getFitness() > m_population[fittest].getFitness());
          fittest = ind;
       }
@@ -30,38 +33,37 @@ void CGA::tournamentSelection(CIndividual * newPopulation)
 
 void CGA::crossoverAndMutation(const CIndividual * inArray)
 {
-   int tmpIndex;
-
-   // Copy tmp population to member array HERE
-   for(int i=0; i<getPopulationSize(); i++)
-   {
-      m_population[i] = inArray[i];
-   }
 
    for(int i=0; i<getPopulationSize(); i+=2) {
       // Crossover
-      if(Utility::random0to(1)<0.9) {
-         m_population[i].crossover(inArray[i+1]);
-         m_population[i+1].crossover(inArray[i]);
+      if(Utility::random0to(1)<0) {
+         std::pair<CIndividual,CIndividual> children = CIndividual::crossover(inArray[i],inArray[i+1]);
+
+
+         /*inArray[i].debugPrint();
+         inArray[i+1].debugPrint();
+         children.first.debugPrint();
+         children.second.debugPrint();
+
+         std::cout<<std::endl;*/
+
+         m_population[i] = children.first;
+         m_population[i+1] = children.second;
       }
 
-      // Mutation
+
       if(Utility::random0to(1)<0.1)
       {
-         //tmpIndex = Utility::randomIndex(PARAMETERS_COUNT);
-         //m_population[i].mutation(m_model, tmpIndex);
          m_population[i].mutation();
       }
       if(Utility::random0to(1)<0.1)
       {
-         //tmpIndex = Utility::randomIndex(PARAMETERS_COUNT);
-         //m_population[i].mutation(m_model, tmpIndex);
-         m_population[i].mutation();
+         m_population[i+1].mutation();
       }
    }
 }
 
-const double CGA::run()
+CIndividual CGA::run()
 {
 
 
@@ -73,17 +75,34 @@ const double CGA::run()
 
 //   evaluateFitness();
 
-   CIndividual newPopulation[POPULATION_SIZE];
-
    evaluateFitness();
-   tournamentSelection(newPopulation);
 
-   return 0.0;
+   for(int i=0;i<10000;++i){
+      CIndividual newPopulation[population_size];
+      tournamentSelection(newPopulation);
+      crossoverAndMutation(newPopulation);
+      evaluateFitness();
+   }
+   
+   return findBest();
+
+}
+
+CIndividual CGA::findBest(){
+   int fittest = m_population[0].getFitness();//fuj
+   int index = 0;
+   for(int i=1;i<population_size;++i){
+      if(fittest < m_population[i].getFitness()){
+         fittest = m_population[i].getFitness();
+         index = i;
+      }
+   }
+   return m_population[index];
 }
 
 int CGA::getPopulationSize()
 {
-   return POPULATION_SIZE;
+   return population_size;
 }
 
 void CGA::evaluateFitness()

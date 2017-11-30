@@ -2,12 +2,13 @@
 #define INDIVIDUAL
 
 #include "constants.h"
+#include <utility>
 
 class CIndividual
 {
 
   private:
-  const static double s_mutationParameterProbability = 0.1;
+  const static double s_mutationParameterDelta = 0.1;
   const static double s_mutationProbability = 0.1;
 
 	static double randomInDeltaNeighborhood(double, double);
@@ -27,13 +28,13 @@ class CIndividual
 
   // Genetic
   void calculateFitness();
-	void crossover(const CIndividual &);
+	static std::pair<CIndividual,CIndividual> crossover(const CIndividual &,const CIndividual &);
 	void mutation();
 
   int getParamsCount() const;
   double getFitness() const;
 
-	void debugPrint();
+	void debugPrint() const;
 };
 
 #endif

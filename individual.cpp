@@ -4,6 +4,7 @@
 #include "constants.h"
 #include <stdio.h>
 #include <iostream>
+#include <utility>
 
 double CIndividual::randomInDeltaNeighborhood(double number, double delta)
 {
@@ -24,15 +25,14 @@ void CIndividual::calculateFitness()
 		// Squared error - just dummy calculation
 		fitness += ((default_parameters[i] - m_params[i]) * (default_parameters[i] - m_params[i]));
 	}
-	m_fitness = fitness;
+	m_fitness = fitness*(-1);
 }
 
 CIndividual::CIndividual(const double * params, double delta)
 {
-	memcpy(m_params, params, sizeof(double) * PARAMETERS_COUNT);
 	do{
 		for(int i=0; i<PARAMETERS_COUNT; ++i){
-			m_params[i] = (randomInDeltaNeighborhood(m_params[i],delta));
+			m_params[i] = (randomInDeltaNeighborhood(params[i],delta));
 		}
 	}while(checkNotPass());
 }
@@ -48,7 +48,7 @@ CIndividual::CIndividual(const CIndividual & o)
    memcpy(this, &o, sizeof(CIndividual));
 }
 */
-void CIndividual::debugPrint(){
+void CIndividual::debugPrint() const{
 	std::cout<<m_params[0];
 	for(int i=1; i<PARAMETERS_COUNT; ++i){
 		std::cout<<", "<<m_params[i];
@@ -64,11 +64,23 @@ double CIndividual::getFitness() const{
 	return m_fitness;
 }
 
-void CIndividual::crossover(const CIndividual & other)
+std::pair<CIndividual,CIndividual> CIndividual::crossover(const CIndividual & parent1, const CIndividual & parent2)
 {
-   for(int i=1; i<getParamsCount(); i+=2){
-      m_params[i] = other.m_params[i];
-   }
+
+	int mid = Utility::randomIndex(4)+4;
+	CIndividual child1,child2;
+
+	for(int i=0; i<mid; i+=1){
+		child1.m_params[i] = parent1.m_params[i];
+		child2.m_params[i] = parent2.m_params[i];
+	}
+
+	for(int i=mid; i< parent1.getParamsCount(); i+=1){
+		child1.m_params[i] = parent2.m_params[i];
+		child2.m_params[i] = parent1.m_params[i];
+	}   
+
+  return std::make_pair(child1,child2);
 }
 
 void CIndividual::mutation()
@@ -76,14 +88,17 @@ void CIndividual::mutation()
 	for(int i=0;i<getParamsCount();++i){
 		if(Utility::random0to(1) < s_mutationProbability)
 		{
+			double tmp = m_params[i];
 			do {
-				m_params[i] = randomInDeltaNeighborhood(m_params[i], s_mutationParameterProbability);
-   		} while(checkNotPass());
+				m_params[i] = randomInDeltaNeighborhood(tmp, s_mutationParameterDelta);
+ 				//std::cout<<"index: "<<i<<" "<<m_params[i]<<std::endl;
+   		} while((i == 7 || i == 8) && checkNotPass());
 		}
 	}
 }
 
 bool CIndividual::checkNotPass()
 {
+	//std::cout<<m_params[8]<<" < "<<m_params[7]<<std::endl;
 	return m_params[8] > m_params[7];
 }
