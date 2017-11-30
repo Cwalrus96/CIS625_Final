@@ -84,6 +84,7 @@ CIndividual CGA::run(int iter, int torunament, double cross, double mutate)
       tournamentSelection(newPopulation);
       crossoverAndMutation(newPopulation);
       evaluateFitness();
+      std::cout<< "Iterace: " << i << ", best fitness: " << findBest().getFitness() << std::endl;
    }
    
    return findBest();
