@@ -41,10 +41,16 @@ void CLammps::fileTersoffParameters(const CIndividual & individual, const std::s
 
 double CLammps::getTersoffPotential(const CIndividual & individual, const std::string & structName, int id)
 {
-   char buf[548];
+   char buf[2848];
 
    std::string fileName = "Pt" + std::to_string(id) + ".tersoff";
    fileTersoffParameters(individual, fileName);
+
+   int npipe[2];
+   pipe(npipe);
+   int saved_stdout = dup(STDOUT_FILENO);
+   dup2(npipe[1], STDOUT_FILENO);
+   close(npipe[1]);
 
    std::string commands = "dimension\t3\n";
    commands += "log\tnone\n";
@@ -62,11 +68,7 @@ double CLammps::getTersoffPotential(const CIndividual & individual, const std::s
 
    lammps_commands_string(m_lmp, (char*) commands.c_str());
 
-   int npipe[2];
-   pipe(npipe);
-   int saved_stdout = dup(STDOUT_FILENO);
-   dup2(npipe[1], STDOUT_FILENO);
-   close(npipe[1]);
+   read(npipe[0], buf, sizeof(buf));
 
    lammps_command(m_lmp, "run\t5\n");
 
@@ -90,8 +92,6 @@ double CLammps::getTersoffPotential(const CIndividual & individual, const std::s
    {
       ss >> etotal;
    }
-
-   std::cout << "HE " << etotal << std::endl;
 
    return etotal;
 }

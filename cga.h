@@ -24,10 +24,11 @@ class CGA
       double m_crossoverProbability, m_mutationProbability;
    public:
       int m_id;
-      const static int population_size = 100;
+      const static int population_size = 20;
 
-      CGA(const double *, const double, int id);
-      CIndividual run(int, int, double, double);
+      CGA(const double *, const double, const double, const double, int);
+      CIndividual run(int, int);
+
       void evaluateFitness();
       int getPopulationSize();
 
@@ -35,6 +36,8 @@ class CGA
       CIndividual m_model;
       void tournamentSelection(CIndividual *);
       CIndividual findBest();
+      int findWorstIndex();
+      void replaceWorst(CIndividual);
       // Tmp array, Model individual
       void crossoverAndMutation(const CIndividual *);
 

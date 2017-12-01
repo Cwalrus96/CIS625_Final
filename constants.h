@@ -1,3 +1,2 @@
-#define TOURNAMENT_SIZE  10
 #define PARAMETERS_COUNT 11
 #define DFT -33.6428507
