@@ -10,6 +10,29 @@
 #include <mpi.h>
 #include <vector>
 
+std::vector<CIndividual> getBest(CIndividual myBestIndividual, int mpi_id, int n_threads)
+{
+   std::vector<CIndividual> bestIndividual;
+
+   if(mpi_id != 0)
+   {        
+      MPI_Send((void*)&myBestIndividual, sizeof(CIndividual), MPI_BYTE, 0, 1, MPI_COMM_WORLD );
+   }
+   else
+   {
+      bestIndividual.push_back(myBestIndividual);
+
+      int i = 0;
+      while(++i<n_threads){
+         MPI_Status status;
+         MPI_Recv((void*)&myBestIndividual, sizeof(CIndividual), MPI_BYTE, MPI_ANY_SOURCE, 1, MPI_COMM_WORLD, &status );
+         //std::cout << "Received individual, his fitness is "<<myBestIndividual.getFitness()<<std::endl;
+         bestIndividual.push_back(myBestIndividual);
+      }
+   }
+   return bestIndividual;
+}
+
 double getTimeStamp() {
    static time_t t_start = 0;
 
@@ -37,56 +60,83 @@ int main(int argc, char * argv[])
    double tstart, ttotal;
    tstart = getTimeStamp();
 
-   //goal,initialDelta,cross prob,mutate prob,id
-   CGA geneticRun(default_parameters, 0.1, 1, 0.2, mpi_id);
-   const int number_of_iterations = 3;
-   const int number_of_island_migrations = 3;
+    //goal,initialDelta,cross prob,mutate prob
+   CGA geneticRun(default_parameters, 0.2, 1, 0.2);
+   const int number_of_iterations = 5;
+   const int number_of_island_migrations = 200;
+   
    CIndividual myBestIndividual;
+   std::vector<CIndividual> bestIndividual;
 
-   for(int a=0;a<number_of_island_migrations;++a){
+   double average;
+   double lastAverage = std::numeric_limits<double>::lowest();
+   int converged = 0;
+
+   geneticRun.evaluateFitness();
+
+   // Maximum number of migration loops
+   for(int a=0;a<number_of_island_migrations;++a)
+   {
+      
+      myBestIndividual = geneticRun.findBest();
+      //std::cout << "Some individuum, his fitness is "<<myBestIndividual.getFitness()<<std::endl; 
+
+      // Check convergence
+      bestIndividual = getBest(myBestIndividual, mpi_id, n_threads);
+
+      if(mpi_id == 0)
+      {
+         average = 0.0;
+         for(int i=0; i<bestIndividual.size(); i++)
+         {
+            average += bestIndividual[i].getFitness();
+         }
+         average /= bestIndividual.size();
+
+         if(average <= lastAverage)
+         {
+            std::cout << "Converged after " << a << " migration loops" << std::endl;
+            converged = 1;
+         }
+         else
+         {
+            converged = 0;
+            lastAverage = average;
+         }
+
+         std::cout << "Migration loop: " << a << ", average: " << average << std::endl;
+
+         for(int j=1; j<n_threads; j++)
+         {
+            MPI_Send(&converged, 1, MPI_INT, j, 3, MPI_COMM_WORLD );
+         }
+      } else {
+         MPI_Recv(&converged, 1, MPI_INT, 0, 3, MPI_COMM_WORLD, &status );
+      }
+
+      if(converged)
+      {
+         break;
+      }      
+      // End of check convegence
+
       //geneticRun.run(number_of_iterations,tournament_size)
       myBestIndividual = geneticRun.run(number_of_iterations, CGA::population_size/5);
 
-      int neighbor = mpi_id;
-      if (++neighbor == n_threads) neighbor = 0;
-
-      MPI_Status status;
-      MPI_Send((void*)&myBestIndividual, sizeof(CIndividual), MPI_UNSIGNED_CHAR, neighbor, 0, MPI_COMM_WORLD );
-      MPI_Recv((void*)&myBestIndividual, sizeof(CIndividual), MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status );
-
+      MPI_Send(&myBestIndividual, sizeof(CIndividual), MPI_BYTE, (mpi_id+1) % n_threads, 7, MPI_COMM_WORLD );
+      MPI_Recv(&myBestIndividual, sizeof(CIndividual), MPI_BYTE, (mpi_id-1) % n_threads, 7, MPI_COMM_WORLD, &status );
+      
       geneticRun.replaceWorst(myBestIndividual);
-
-      std::cout << "======================================= END OF MIGRATION ================================================" << std::endl;
    }
-
-   myBestIndividual = geneticRun.findBest();
-
-   if(mpi_id != root_id){
-      MPI_Send((void*)&myBestIndividual, sizeof(CIndividual), MPI_UNSIGNED_CHAR, root_id, 0, MPI_COMM_WORLD );
-   }else{
-      std::vector<CIndividual> bestIndividual;
-      bestIndividual.push_back(myBestIndividual);
-
-      int i = 0;
-      while(++i<n_threads){
-         MPI_Status status;
-         MPI_Recv((void*)&myBestIndividual, sizeof(CIndividual), MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status );
-         std::cout<<"received individual, his fitness is "<<myBestIndividual.getFitness()<<std::endl;
-         std::cout<<"parameters: ";
-	 std::cout << myBestIndividual.printParameters() << std::endl;
-         bestIndividual.push_back(myBestIndividual);
-      }
-
+   
+   if(mpi_id == 0)
+   {
       CIndividual bestFromBest = Utility::findBestInArray(bestIndividual,n_threads);
-      ttotal = getTimeStamp()-tstart;
-      std::cout<<"Number of cores/islands: "<<n_threads<<std::endl;
-      std::cout<<"Total time spent: "<<ttotal<<std::endl;
-      std::cout<<"Fitness after " << number_of_iterations << " iterations: " << bestFromBest.getFitness()<<std::endl;
-      std::cout<<"Best individual: " << std::endl;
-      std::cout << bestFromBest.printParameters() << std::endl;
+      std::cout << "Best - fitness: " << bestFromBest.getFitness() << std::endl;
+      bestFromBest.debugPrint();
    }
 
-   MPI_Finalize();
+   MPI_Finalize(); 
 
    return 0;
 }
