@@ -15,7 +15,7 @@ std::vector<CIndividual> getBest(CIndividual myBestIndividual, int mpi_id, int n
    std::vector<CIndividual> bestIndividual;
 
    if(mpi_id != 0)
-   {        
+   {
       MPI_Send((void*)&myBestIndividual, sizeof(CIndividual), MPI_BYTE, 0, 1, MPI_COMM_WORLD );
    }
    else
@@ -53,6 +53,7 @@ int main(int argc, char * argv[])
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_id);
    MPI_Comm_size(MPI_COMM_WORLD,&n_threads);
+   MPI_Status status;
 
    CLammps::initialize();
 
@@ -61,10 +62,10 @@ int main(int argc, char * argv[])
    tstart = getTimeStamp();
 
     //goal,initialDelta,cross prob,mutate prob
-   CGA geneticRun(default_parameters, 0.2, 1, 0.2);
+   CGA geneticRun(default_parameters, 0.2, 1, 0.2, mpi_id);
    const int number_of_iterations = 5;
    const int number_of_island_migrations = 200;
-   
+
    CIndividual myBestIndividual;
    std::vector<CIndividual> bestIndividual;
 
@@ -77,9 +78,9 @@ int main(int argc, char * argv[])
    // Maximum number of migration loops
    for(int a=0;a<number_of_island_migrations;++a)
    {
-      
+
       myBestIndividual = geneticRun.findBest();
-      //std::cout << "Some individuum, his fitness is "<<myBestIndividual.getFitness()<<std::endl; 
+      //std::cout << "Some individuum, his fitness is "<<myBestIndividual.getFitness()<<std::endl;
 
       // Check convergence
       bestIndividual = getBest(myBestIndividual, mpi_id, n_threads);
@@ -117,7 +118,7 @@ int main(int argc, char * argv[])
       if(converged)
       {
          break;
-      }      
+      }
       // End of check convegence
 
       //geneticRun.run(number_of_iterations,tournament_size)
@@ -125,18 +126,18 @@ int main(int argc, char * argv[])
 
       MPI_Send(&myBestIndividual, sizeof(CIndividual), MPI_BYTE, (mpi_id+1) % n_threads, 7, MPI_COMM_WORLD );
       MPI_Recv(&myBestIndividual, sizeof(CIndividual), MPI_BYTE, (mpi_id-1) % n_threads, 7, MPI_COMM_WORLD, &status );
-      
+
       geneticRun.replaceWorst(myBestIndividual);
    }
-   
+
    if(mpi_id == 0)
    {
       CIndividual bestFromBest = Utility::findBestInArray(bestIndividual,n_threads);
       std::cout << "Best - fitness: " << bestFromBest.getFitness() << std::endl;
-      bestFromBest.debugPrint();
+      std::cout << bestFromBest.printParameters() << std::endl;
    }
 
-   MPI_Finalize(); 
+   MPI_Finalize();
 
    return 0;
 }
