@@ -1,13 +1,25 @@
+#include "mpi.h"
+#include "input.h"
+#include "library.h"
+#include "lammps.h"
 #include "individual.h"
-#include "constants.h"
-#include "utility.h"
+#include "clammps.h"
 #include "cga.h"
-#include <iostream>
+#include "utility.h"
 
-CGA::CGA(const double * array, const double delta)
+#include <string>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sstream>
+#include <fstream>
+
+using namespace std;
+
+CGA::CGA(const double * array, const double delta, int id)
 {
-
-
+   m_id = id;
    for ( int i = 0; i < population_size; i++ )
    {
       m_population[i] = CIndividual(array, delta);
@@ -37,7 +49,7 @@ void CGA::crossoverAndMutation(const CIndividual * inArray)
    for(int i=0; i<getPopulationSize(); i+=2) {
       // Crossover
       if(Utility::random0to(1)<m_crossoverProbability) {
-         std::pair<CIndividual,CIndividual> children = CIndividual::crossover(inArray[i],inArray[i+1]);
+         pair<CIndividual,CIndividual> children = CIndividual::crossover(inArray[i],inArray[i+1]);
 /*
          inArray[i].debugPrint();
          inArray[i+1].debugPrint();
@@ -77,8 +89,9 @@ CIndividual CGA::run(int iter, int torunament, double cross, double mutate)
 
 //   evaluateFitness();
 
+
    evaluateFitness();
-   std::cout<<"Fitness pred prvni iteraci: " << findBest().getFitness() <<std::endl;
+   cout<<"Fitness pred prvni iteraci: " << findBest().getFitness() << endl;
 
    for(int i=0;i<iter;++i){
       CIndividual newPopulation[population_size];
@@ -87,7 +100,7 @@ CIndividual CGA::run(int iter, int torunament, double cross, double mutate)
       evaluateFitness();
       //std::cout<< "Iterace: " << i << ", best fitness: " << findBest().getFitness() << std::endl;
    }
-   
+
    return findBest();
 
 }
@@ -113,6 +126,6 @@ void CGA::evaluateFitness()
 {
    for(int i=0; i<getPopulationSize(); i++)
    {
-      m_population[i].calculateFitness();
+      m_population[i].calculateFitness(m_id);
    }
 }

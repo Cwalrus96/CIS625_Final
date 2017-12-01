@@ -1,10 +1,13 @@
+#include "mpi.h"
+#include "input.h"
 #include "individual.h"
-#include <cstring>
+#include "clammps.h"
 #include "utility.h"
-#include "constants.h"
-#include <stdio.h>
-#include <iostream>
-#include <utility>
+
+#include <string>
+#include <sstream>
+
+using namespace std;
 
 double CIndividual::randomInDeltaNeighborhood(double number, double delta)
 {
@@ -17,20 +20,10 @@ double CIndividual::randomInDeltaNeighborhood(double number, double delta)
 	return rangeLowBound + rangeOffset;
 }
 
-void CIndividual::calculateFitness()
+void CIndividual::calculateFitness(int gaID)
 {
-  double default_parameters[] = {30611,113.064,0.5289,0.5916,0.0426,1.3484,80.5297,2.85,2.25,2.9699,1017.1};
-	double tmp, fitness;
-	fitness = 0.0;
-	for(int i=0; i<PARAMETERS_COUNT; ++i){
-		// Squared error - just dummy calculation
-		tmp = (default_parameters[i] - m_params[i]);
-		if(tmp<0.0)
-			tmp = -tmp;
-		fitness += tmp/m_params[i];
-		//fitness += ((default_parameters[i] - m_params[i]) * (default_parameters[i] - m_params[i]));
-	}
-	m_fitness = fitness*(-1);
+   double tersoffDif = CLammps::getTersoffPotential(*this, "Ptbcc", gaID) - CLammps::getTersoffPotential(*this, "97xPtbcc", gaID);
+   m_fitness = (DFT - tersoffDif)*(DFT - tersoffDif)*(-1);
 }
 
 CIndividual::CIndividual(const double * params, double delta)
@@ -53,23 +46,26 @@ CIndividual::CIndividual(const CIndividual & o)
    memcpy(this, &o, sizeof(CIndividual));
 }
 
-void CIndividual::debugPrint() const{
-	std::cout<<m_params[0];
-	for(int i=1; i<PARAMETERS_COUNT; ++i){
-		std::cout<<", "<<m_params[i];
+string CIndividual::printParameters() const
+{
+   string params;
+	for(int i=0; i<PARAMETERS_COUNT; ++i){
+		params += " " + to_string(m_params[i]);
 	}
-	std::cout<<std::endl;
+   return params;
 }
 
-int CIndividual::getParamsCount() const{
+int CIndividual::getParamsCount() const
+{
 	return PARAMETERS_COUNT;
 }
 
-double CIndividual::getFitness() const{
+double CIndividual::getFitness() const
+{
 	return m_fitness;
 }
 
-std::pair<CIndividual,CIndividual> CIndividual::crossover(const CIndividual & parent1, const CIndividual & parent2)
+pair<CIndividual,CIndividual> CIndividual::crossover(const CIndividual & parent1, const CIndividual & parent2)
 {
 
 	int mid = Utility::randomIndex(4)+4;
@@ -100,9 +96,9 @@ std::pair<CIndividual,CIndividual> CIndividual::crossover(const CIndividual & pa
 	for(int i=mid; i< parent1.getParamsCount(); i+=1){
 		child1.m_params[i] = parent2.m_params[i];
 		child2.m_params[i] = parent1.m_params[i];
-	}   
+	}
 	*/
-	return std::make_pair(child1,child2);
+	return make_pair(child1,child2);
 }
 
 void CIndividual::mutation()
