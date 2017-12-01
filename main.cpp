@@ -35,27 +35,37 @@ int main(int argc, char * argv[])
 
    //goal,initialDelta,cross prob,mutate prob
    CGA geneticRun(default_parameters, 50, 1, 0.2);
-   
-   const int number_of_iterations = 2;
+   const int number_of_iterations = 3;
+   const int number_of_island_migrations = 3;
+   CIndividual myBestIndividual;
 
-   //geneticRun.run(number_of_iterations,tournament_size)
-   CIndividual myBestIndividual = geneticRun.run(number_of_iterations, CGA::population_size/5);
-   
+   for(int a=0;a<number_of_island_migrations;++a){
+      //geneticRun.run(number_of_iterations,tournament_size)
+      myBestIndividual = geneticRun.run(number_of_iterations, CGA::population_size/5);
+               
+      int neighbor = mpi_id;
+      if (++neighbor == n_threads) neighbor = 0;
+
+      MPI_Status status;
+      MPI_Send((void*)&myBestIndividual, sizeof(CIndividual), MPI_UNSIGNED_CHAR, neighbor, 0, MPI_COMM_WORLD );
+      MPI_Recv((void*)&myBestIndividual, sizeof(CIndividual), MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status );
+      
+      geneticRun.replaceWorst(myBestIndividual);
+   }
+
+   myBestIndividual = geneticRun.findBest();
+
    if(mpi_id != root_id){         
-      std::cout<<"posilam"<<std::endl;
       MPI_Send((void*)&myBestIndividual, sizeof(CIndividual), MPI_UNSIGNED_CHAR, root_id, 0, MPI_COMM_WORLD );
    }else{
-      std::cout<<"prijimam"<<std::endl;
       std::vector<CIndividual> bestIndividual;
-
       bestIndividual.push_back(myBestIndividual);
 
-      int i=0;
-      while(++i < n_threads){
+      int i = 0;
+      while(++i<n_threads){
          MPI_Status status;
-         std::cout<<"recv"<<std::endl;
          MPI_Recv((void*)&myBestIndividual, sizeof(CIndividual), MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status );
-         std::cout<<"received individual, his fitness is "<<bestIndividual[i].getFitness()<<std::endl;
+         std::cout<<"received individual, his fitness is "<<myBestIndividual.getFitness()<<std::endl;
          std::cout<<"parameters: ";
          myBestIndividual.debugPrint();
          bestIndividual.push_back(myBestIndividual);
@@ -63,10 +73,10 @@ int main(int argc, char * argv[])
 
       CIndividual bestFromBest = Utility::findBestInArray(bestIndividual,n_threads);  
       ttotal = getTimeStamp()-tstart;
-      std::cout<<"Number of cores: "<<n_threads<<std::endl;
+      std::cout<<"Number of cores/islands: "<<n_threads<<std::endl;
       std::cout<<"Total time spent: "<<ttotal<<std::endl;
       std::cout<<"Fitness after " << number_of_iterations << " iterations: " << bestFromBest.getFitness()<<std::endl;
-      std::cout<<"Found BOP parameters:" << std::endl;
+      std::cout<<"Best individual: " << std::endl;    
       bestFromBest.debugPrint();
    }
 
@@ -74,3 +84,5 @@ int main(int argc, char * argv[])
 
    return 0;
 }
+
+

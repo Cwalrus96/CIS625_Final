@@ -96,6 +96,23 @@ CIndividual CGA::run(int iter, int torunament)
 
 }
 
+void CGA::replaceWorst(CIndividual newIndividual){
+   int worstIndex = findWorstIndex();
+   m_population[worstIndex] = newIndividual;
+}
+
+int CGA::findWorstIndex(){
+   int worst = m_population[0].getFitness();//fuj
+   int index = 0;
+   for(int i=1;i<population_size;++i){
+      if(worst > m_population[i].getFitness()){
+         worst = m_population[i].getFitness();
+         index = i;
+      }
+   }
+   return index;
+}
+
 CIndividual CGA::findBest(){
    int fittest = m_population[0].getFitness();//fuj
    int index = 0;

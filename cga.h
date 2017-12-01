@@ -18,6 +18,8 @@ class CGA
       CIndividual m_model;
       void tournamentSelection(CIndividual *);
       CIndividual findBest();
+      int findWorstIndex();
+      void replaceWorst(CIndividual);
       // Tmp array, Model individual
       void crossoverAndMutation(const CIndividual *);
 
