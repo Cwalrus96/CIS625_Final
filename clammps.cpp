@@ -21,8 +21,8 @@ void CLammps::initialize()
 {
 //   char args[3][20] = {"-log none", "-echo none", "-screen none"};
 
-   char * args = "-log none";
-   CLammps::m_lmp = new LAMMPS(1, &args, MPI_COMM_WORLD);
+   char args[][20] = {"-partition", "yes", "2", "-log", "none", "-echo", "none", "-screen", "none"};
+   CLammps::m_lmp = new LAMMPS(1, args, MPI_COMM_WORLD);
 
 }
 
