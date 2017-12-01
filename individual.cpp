@@ -12,7 +12,7 @@ double CIndividual::randomInDeltaNeighborhood(double number, double delta)
 
 	rangeWidth = (delta * 2) * number;
 	rangeLowBound = number - (delta * number);
-	rangeOffset = Utility::random0to(rangeWidth);
+	rangeOffset = Utility::randomer.random0to(rangeWidth);
 
 	return rangeLowBound + rangeOffset;
 }
@@ -73,7 +73,7 @@ std::pair<CIndividual,CIndividual> CIndividual::crossover(const CIndividual & pa
 
 	CIndividual child1,child2;
 
-	double ran = Utility::random0to(1);
+	double ran = Utility::randomer.random0to(1);
 	int *uniformCross;
 
 	int uniformCross1[] = {1, 0, 1, 0, 1, 0, 1, 0, 0, 1, 0};
@@ -124,7 +124,7 @@ std::pair<CIndividual,CIndividual> CIndividual::crossover(const CIndividual & pa
 void CIndividual::mutation(double mutationParameterProbability,double mutationParameterDelta)
 {
 	for(int i=0;i<getParamsCount();++i){
-		if(Utility::random0to(1) < mutationParameterProbability)
+		if(Utility::randomer.random0to(1) < mutationParameterProbability)
 		{
 			double tmp = m_params[i];
 			do {

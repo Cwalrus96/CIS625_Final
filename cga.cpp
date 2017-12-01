@@ -22,10 +22,10 @@ void CGA::tournamentSelection(CIndividual * newPopulation)
    for ( int i = 0; i < population_size; i++ )
    {
 
-      int fittest = Utility::randomIndex(population_size);
+      int fittest = Utility::randomer.randomIndex(population_size);
       for ( int j = 1; j < m_tournamentSize; j++ )
       {
-         int ind = Utility::randomIndex(population_size);
+         int ind = Utility::randomer.randomIndex(population_size);
          if ( m_population[ind].getFitness() > m_population[fittest].getFitness()){
             fittest = ind;
          }
@@ -40,7 +40,7 @@ void CGA::crossoverAndMutation(const CIndividual * inArray)
 
    for(int i=0; i<getPopulationSize(); i+=2) {
       // Crossover
-      if(Utility::random0to(1)<m_crossoverProbability) {
+      if(Utility::randomer.random0to(1)<m_crossoverProbability) {
          std::pair<CIndividual,CIndividual> children = CIndividual::crossover(inArray[i],inArray[i+1]);
 /*
          inArray[i].debugPrint();
@@ -55,11 +55,11 @@ void CGA::crossoverAndMutation(const CIndividual * inArray)
       }
 
 
-      if(Utility::random0to(1)<m_mutationProbability)
+      if(Utility::randomer.random0to(1)<m_mutationProbability)
       {
          m_population[i].mutation(0.1,0.2);
       }
-      if(Utility::random0to(1)<m_mutationProbability)
+      if(Utility::randomer.random0to(1)<m_mutationProbability)
       {
          m_population[i+1].mutation(0.1,0.2);
       }
@@ -86,7 +86,9 @@ CIndividual CGA::run(int iter, int torunament)
       CIndividual newPopulation[population_size];
       tournamentSelection(newPopulation);
       crossoverAndMutation(newPopulation);
+
       evaluateFitness();
+
       std::cout<< "Iterace: " << i << ", best fitness: " << findBest().getFitness() << std::endl;
    }
    

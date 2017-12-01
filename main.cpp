@@ -5,79 +5,72 @@
 #include <iostream>
 #include <ctime>
 #include <cstdlib>
+#include <mpi.h>
+#include <vector>
 
-int main()
+double getTimeStamp() {
+   static time_t t_start = 0;
+
+   struct timespec ts;
+   clock_gettime(CLOCK_REALTIME, &ts);
+   if( t_start == 0 ) t_start = ts.tv_sec;
+
+   return (double) (ts.tv_sec - t_start) + ts.tv_nsec * 1.0e-9;
+}
+
+int main(int argc, char * argv[])
 {
-
-   srand(time(NULL));
-
-   //GAGAGA GAGAG AGAGAGAG
-
    double default_parameters[] = {30611,113.064,0.5289,0.5916,0.0426,1.3484,80.5297,2.85,2.25,2.9699,1017.1};
+   const int root_id = 0;
+   int mpi_id,n_threads,init_threads = 4;
+
+   //init MPI
+   MPI_Init(&argc, &argv);
+   MPI_Comm_rank(MPI_COMM_WORLD,&mpi_id);
+   MPI_Comm_size(MPI_COMM_WORLD,&n_threads);
+
+   //time measurement
+   double tstart, ttotal;
+   tstart = getTimeStamp();
+
+   //goal,initialDelta,cross prob,mutate prob
+   CGA geneticRun(default_parameters, 50, 1, 0.2);
    
-   CGA cga1(default_parameters, 50, 1, 0.2);
-   CGA cga2(default_parameters, 50, 1, 0.2);
-   CGA cga3(default_parameters, 50, 1, 0.2);
+   const int number_of_iterations = 2;
+
+   //geneticRun.run(number_of_iterations,tournament_size)
+   CIndividual myBestIndividual = geneticRun.run(number_of_iterations, CGA::population_size/5);
    
-   /*std::cout<<"defaultni parametry:"<<std::endl;
-   CIndividual a(default_parameters, 0);
-   a.debugPrint();
-   std::cout<<std::endl;
-*/
-   // cga.run(pocet iteraci, velikost turnaje, pravdepodobnost Xoveru, pravdepodobnost mutace)
+   if(mpi_id != root_id){         
+      std::cout<<"posilam"<<std::endl;
+      MPI_Send((void*)&myBestIndividual, sizeof(CIndividual), MPI_UNSIGNED_CHAR, root_id, 0, MPI_COMM_WORLD );
+   }else{
+      std::cout<<"prijimam"<<std::endl;
+      std::vector<CIndividual> bestIndividual;
 
-   int pocetIteraci = 100;
-   int tournamentSize = CGA::population_size/5;
-   CIndividual nejlepsi_typek1(cga1.run(pocetIteraci, tournamentSize));
-   std::cout<<"Fitness po " << pocetIteraci << " iteracich: " << nejlepsi_typek1.getFitness()<<std::endl;
+      bestIndividual.push_back(myBestIndividual);
 
-   /*pocetIteraci = 1000;
-   CIndividual nejlepsi_typek2(cga2.run(pocetIteraci, 50));
-   std::cout<<"Fitness po " << pocetIteraci << " iteracich: " << nejlepsi_typek2.getFitness()<<std::endl;
+      int i=0;
+      while(++i < n_threads){
+         MPI_Status status;
+         std::cout<<"recv"<<std::endl;
+         MPI_Recv((void*)&myBestIndividual, sizeof(CIndividual), MPI_UNSIGNED_CHAR, MPI_ANY_SOURCE, 0, MPI_COMM_WORLD, &status );
+         std::cout<<"received individual, his fitness is "<<bestIndividual[i].getFitness()<<std::endl;
+         std::cout<<"parameters: ";
+         myBestIndividual.debugPrint();
+         bestIndividual.push_back(myBestIndividual);
+      }
 
-   pocetIteraci = 10000;
-   CIndividual nejlepsi_typek3(cga3.run(pocetIteraci, 50));
-   std::cout<<"Fitness po " << pocetIteraci << " iteracich: " << nejlepsi_typek3.getFitness()<<std::endl;
-   //std::cout<<"nejlepsi typek:"<<std::endl;*/
-   //nejlepsi_typek.debugPrint();
-   //std::cout<<std::endl;
-   /*
+      CIndividual bestFromBest = Utility::findBestInArray(bestIndividual,n_threads);  
+      ttotal = getTimeStamp()-tstart;
+      std::cout<<"Number of cores: "<<n_threads<<std::endl;
+      std::cout<<"Total time spent: "<<ttotal<<std::endl;
+      std::cout<<"Fitness after " << number_of_iterations << " iterations: " << bestFromBest.getFitness()<<std::endl;
+      std::cout<<"Found BOP parameters:" << std::endl;
+      bestFromBest.debugPrint();
+   }
 
-   CIndividual x1(default_parameters, 0.2);
-   CIndividual x2(default_parameters, 0.2);
+   MPI_Finalize(); 
 
-   x1.calculateFitness();
-   x2.calculateFitness();
-
-   std::cout<<"fitness x1:"<<std::endl;
-   std::cout<<x1.getFitness()<<std::endl;
-   x1.debugPrint();
-   std::cout<<std::endl;
-
-
-   std::cout<<"fitness x2:"<<std::endl;
-   std::cout<<x2.getFitness()<<std::endl;
-   x2.debugPrint();
-   std::cout<<std::endl;
-
-*/
-   /*CIndividual x3(x1);
-   CIndividual x4(x2);
-
-   x3.crossover(x2);
-   x4.crossover(x1);
-
-   x1.debugPrint();
-   x2.debugPrint();
-   std::cout << "After crossover:" << std::endl;
-   x3.debugPrint();
-   x4.debugPrint();
-
-   x3.mutation();
-   x4.mutation();
-   std::cout << "After mutation:" << std::endl;
-   x3.debugPrint();
-   x4.debugPrint();
-*/
    return 0;
 }
