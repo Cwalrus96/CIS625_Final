@@ -1,7 +1,4 @@
 #include "mpi.h"
-#include "input.h"
-#include "library.h"
-#include "lammps.h"
 #include "individual.h"
 #include "clammps.h"
 #include "cga.h"
@@ -77,17 +74,7 @@ CIndividual CGA::run(int iter, int torunament)
 {
    m_tournamentSize = torunament;
 
-
-   // CIndividual modelIndividual({30611,113.064,0.5289,0.5916,0.0426,1.3484,80.5297,2.85,2.25,2.9699,1017.1});
-
-   // CIndividual test1(modelIndividual,0.1);
-
-   // CIndividual test2(modelIndividual,0.1);
-
 //   evaluateFitness();
-
-
-   evaluateFitness();
    cout<<"Fitness pred prvni iteraci: " << findBest().getFitness() << endl;
 
    for(int i=0;i<iter;++i){

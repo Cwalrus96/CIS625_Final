@@ -48,14 +48,11 @@ int main(int argc, char * argv[])
    double default_parameters[] = {30611,113.064,0.5289,0.5916,0.0426,1.3484,80.5297,2.85,2.25,2.9699,1017.1};
    const int root_id = 0;
    int mpi_id,n_threads,init_threads = 4;
-
    //init MPI
    MPI_Init(&argc, &argv);
    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_id);
    MPI_Comm_size(MPI_COMM_WORLD,&n_threads);
    MPI_Status status;
-
-   CLammps::initialize();
 
    //time measurement
    double tstart, ttotal;
@@ -63,8 +60,8 @@ int main(int argc, char * argv[])
 
     //goal,initialDelta,cross prob,mutate prob
    CGA geneticRun(default_parameters, 0.2, 1, 0.2, mpi_id);
-   const int number_of_iterations = 5;
-   const int number_of_island_migrations = 200;
+   const int number_of_iterations = 1;
+   const int number_of_island_migrations = 1;
 
    CIndividual myBestIndividual;
    std::vector<CIndividual> bestIndividual;

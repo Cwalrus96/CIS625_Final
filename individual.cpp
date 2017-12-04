@@ -1,5 +1,4 @@
 #include "mpi.h"
-#include "input.h"
 #include "individual.h"
 #include "clammps.h"
 #include "utility.h"

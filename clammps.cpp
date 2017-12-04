@@ -1,30 +1,18 @@
 #include "mpi.h"
-#include "input.h"
-#include "library.h"
-#include "lammps.h"
 #include "individual.h"
 #include "clammps.h"
 
 #include <string>
-#include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 #include <sstream>
 #include <fstream>
-
-using namespace LAMMPS_NS;
-
-LAMMPS * CLammps::m_lmp;
-
-void CLammps::initialize()
-{
-//   char args[3][20] = {"-log none", "-echo none", "-screen none"};
-
-   char args[][20] = {"-partition", "yes", "2", "-log", "none", "-echo", "none", "-screen", "none"};
-   CLammps::m_lmp = new LAMMPS(1, args, MPI_COMM_WORLD);
-
-}
+#include <array>
+#include <memory>
+#include <iostream>
+#include <cstdio>
+#include <stdexcept>
 
 void CLammps::fileTersoffParameters(const CIndividual & individual, const std::string & fileName)
 {
@@ -39,6 +27,20 @@ void CLammps::fileTersoffParameters(const CIndividual & individual, const std::s
    file.close();
 }
 
+std::string exec(const char* cmd)
+{
+    std::array<char, 128> buffer;
+    std::string result;
+    std::shared_ptr<FILE> pipe(popen(cmd, "r"), pclose);
+    //if (!pipe) return NULL;
+    while (!feof(pipe.get()))
+    {
+        if (fgets(buffer.data(), 128, pipe.get()) != NULL)
+            result += buffer.data();
+    }
+    return result;
+}
+
 double CLammps::getTersoffPotential(const CIndividual & individual, const std::string & structName, int id)
 {
    char buf[2848];
@@ -46,15 +48,7 @@ double CLammps::getTersoffPotential(const CIndividual & individual, const std::s
    std::string fileName = "Pt" + std::to_string(id) + ".tersoff";
    fileTersoffParameters(individual, fileName);
 
-   int npipe[2];
-   pipe(npipe);
-   int saved_stdout = dup(STDOUT_FILENO);
-   dup2(npipe[1], STDOUT_FILENO);
-   close(npipe[1]);
-
    std::string commands = "dimension\t3\n";
-   commands += "log\tnone\n";
-   commands += "echo\tnone\n";
    commands += "boundary\tp p p\n";
    commands += "units\treal\n";
    commands += "atom_style\tcharge\n";
@@ -65,34 +59,17 @@ double CLammps::getTersoffPotential(const CIndividual & individual, const std::s
    commands += "neigh_modify\tevery 10 delay 0 check no\n";
    commands += "minimize\t1.0e-4 1.0e-6 100 1000\n";
    commands += "timestep\t0.25\n";
+   commands += "run\t5\n";
 
-   lammps_commands_string(m_lmp, (char*) commands.c_str());
+   std::ofstream file;
+   file.open("in.pt");
+   file << commands << std::endl;
+   file.close();
 
-   read(npipe[0], buf, sizeof(buf));
+   std::string out = exec("../../lammps-11Aug17/src/lmp_mpi -partition 2x1 -in in.pt");
 
-   lammps_command(m_lmp, "run\t5\n");
+   std::cout << out << std::endl;
 
-   read(npipe[0], buf, sizeof(buf));
-
-   dup2(saved_stdout, STDOUT_FILENO);
-
-   lammps_command(m_lmp, "clear\n");
-
-   std::stringstream ss;
-   ss.str(buf);
-   std::string line;
-   double etotal;
-
-   for ( int i = 0; i < 8; i++ )
-   {
-      std::getline( ss, line );
-   }
-
-   for ( int i = 0; i < 5; i++ )
-   {
-      ss >> etotal;
-   }
-
-   return etotal;
+   return 1.0;
 }
 

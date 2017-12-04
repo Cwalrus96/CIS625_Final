@@ -2,20 +2,11 @@
 #define CGA_H
 
 #include "mpi.h"
-#include "input.h"
-#include "library.h"
-#include "lammps.h"
 #include "individual.h"
 #include "clammps.h"
 #include "cga.h"
 
 #include <string>
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <sstream>
-#include <fstream>
 
 class CGA
 {
@@ -24,7 +15,7 @@ class CGA
       double m_crossoverProbability, m_mutationProbability;
    public:
       int m_id;
-      const static int population_size = 20;
+      const static int population_size = 100;
 
       CGA(const double *, const double, const double, const double, int);
       CIndividual run(int, int);
